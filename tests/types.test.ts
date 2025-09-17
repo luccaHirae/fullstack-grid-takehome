@@ -1,11 +1,11 @@
-import { test, expect, describe } from "bun:test";
-import { 
-  Cell, 
-  FormulaCell, 
+import { test, expect, describe } from 'bun:test';
+import {
+  Cell,
+  FormulaCell,
   isFormula,
   toCellAddress,
   parseCellAddress,
-  formatCellAddress
+  formatCellAddress,
 } from '@/types';
 
 describe('Type Guards', () => {
@@ -13,20 +13,20 @@ describe('Type Guards', () => {
     const formulaCell: FormulaCell = {
       kind: 'formula',
       src: '=A1+B1',
-      ast: null as any
+      ast: null as any,
     };
-    
+
     const literalCell: Cell = {
       kind: 'literal',
-      value: 42
+      value: 42,
     };
-    
+
     const errorCell: Cell = {
       kind: 'error',
       code: 'DIV0',
-      message: 'Division by zero'
+      message: 'Division by zero',
     };
-    
+
     expect(isFormula(formulaCell)).toBe(true);
     expect(isFormula(literalCell)).toBe(false);
     expect(isFormula(errorCell)).toBe(false);
@@ -38,15 +38,18 @@ describe('Cell Address Helpers', () => {
     const addr = toCellAddress('A1');
     expect(addr).toBe('A1');
   });
-  
-  test.skip('parseCellAddress extracts column and row', () => {
+
+  test('parseCellAddress extracts column and row', () => {
     // This will fail until implemented
     expect(parseCellAddress(toCellAddress('A1'))).toEqual({ col: 0, row: 0 });
     expect(parseCellAddress(toCellAddress('B2'))).toEqual({ col: 1, row: 1 });
-    expect(parseCellAddress(toCellAddress('AA99'))).toEqual({ col: 26, row: 98 });
+    expect(parseCellAddress(toCellAddress('AA99'))).toEqual({
+      col: 26,
+      row: 98,
+    });
   });
-  
-  test.skip('formatCellAddress creates address from coordinates', () => {
+
+  test('formatCellAddress creates address from coordinates', () => {
     // This will fail until implemented
     expect(formatCellAddress(0, 0)).toBe(toCellAddress('A1'));
     expect(formatCellAddress(1, 1)).toBe(toCellAddress('B2'));
