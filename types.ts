@@ -3,18 +3,35 @@ export type CellAddress = string & { __brand: 'CellAddress' };
 
 // Helper functions for CellAddress
 export const toCellAddress = (addr: string): CellAddress => {
-  // TODO: Validate format (e.g., A1, B12, AA99)
-  return addr as CellAddress;
+  // Normalize by stripping absolute markers; representation does not encode absoluteness.
+  const normalized = addr.replace(/\$/g, '');
+  if (!/^[A-Z]+[0-9]+$/.test(normalized)) {
+    throw new Error(`Invalid cell address: ${addr}`);
+  }
+  return normalized as CellAddress;
 };
 
-export const parseCellAddress = (addr: CellAddress): { col: number; row: number } => {
-  // TODO: Parse "A1" -> { col: 0, row: 0 }
-  throw new Error('Not implemented');
+export const parseCellAddress = (
+  addr: CellAddress
+): { col: number; row: number } => {
+  const m = addr.match(/^([A-Z]+)([0-9]+)$/);
+  if (!m) throw new Error(`Invalid cell address: ${addr}`);
+  const [, letters, digits] = m;
+  let col = 0;
+  for (const ch of letters) col = col * 26 + (ch.charCodeAt(0) - 64);
+  const row = parseInt(digits, 10);
+  return { col: col - 1, row: row - 1 };
 };
 
 export const formatCellAddress = (col: number, row: number): CellAddress => {
-  // TODO: Format { col: 0, row: 0 } -> "A1"
-  throw new Error('Not implemented');
+  if (col < 0 || row < 0) throw new Error('Negative indices');
+  let n = col;
+  let letters = '';
+  while (n >= 0) {
+    letters = String.fromCharCode((n % 26) + 65) + letters;
+    n = Math.floor(n / 26) - 1;
+  }
+  return toCellAddress(letters + (row + 1));
 };
 
 // Cell types (discriminated union)

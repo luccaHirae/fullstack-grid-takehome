@@ -5,180 +5,329 @@ Please fill out this document with your design decisions and rationale as you im
 ## Design Analysis
 
 ### V7 Labs Study
+
 After reviewing [v7labs.com](https://v7labs.com):
 
 **What I liked:**
-- TODO: What aspects of their design appeal to you?
-- TODO: Which specific UI patterns would work well for a spreadsheet?
-- TODO: What makes their data presentation effective?
+
+- What aspects of their design appeal to you?
+- Animations and microinteractions that enhance user experience
+- Which specific UI patterns would work well for a spreadsheet?
+- Card-like toolbars, and simple, scannable tables.
+- What makes their data presentation effective?
+- High contrast, generous spacing, and restrained color use.
 
 **What I would adapt differently:**
-- TODO: What doesn't translate well to spreadsheet UX?
-- TODO: What would you change for this use case?
 
-### Paradigm Study  
+- What doesn't translate well to spreadsheet UX?
+- Heavy visuals and oversized imagery don’t fit dense grids.
+- What would you change for this use case?
+- More compact layouts, clearer cell boundaries, and a focus on data legibility.
+
+### Paradigm Study
+
 After reviewing [paradigm.co](https://paradigm.co):
 
 **What I liked:**
-- TODO: What design principles stand out?
-- TODO: How do they handle information density?
-- TODO: What about their typography/spacing system?
+
+- What design principles stand out?
+- Clean, minimalistic design with a dark background.
+- How do they handle information density?
+- Clear hierarchy with bold typography and ample spacing.
+- What about their typography/spacing system?
+- Strong, consistent typography that guides the eye effectively.
 
 **What I would adapt differently:**
-- TODO: What's too much for a spreadsheet interface?
-- TODO: Where would you simplify?
+
+- What's too much for a spreadsheet interface?
+- Dark mode might reduce readability in a data-heavy context.
+- Where would you simplify?
+- Lighter hover effects, fewer font weights, and a more neutral color palette.
 
 ### My Design Synthesis
+
 **How I'll blend both influences:**
-- TODO: What will you take from each?
-- TODO: What will be uniquely yours?
-- TODO: What's your color palette and why?
-- TODO: What's your typography strategy?
+
+- What will you take from each?
+- From v7labs: Use of whitespace and clear data presentation.
+- From paradigm: Strong typography and a clean, modern aesthetic.
+- What will be uniquely yours?
+- A balanced approach that prioritizes usability and clarity in a spreadsheet context.
+- What's your color palette and why?
+- A neutral palette with blue accents for interactivity, ensuring high contrast for readability.
+- What's your typography strategy?
+- Roboto for UI and data; compact sizes for density.
 
 ## Priority 1: Core Functionality Decisions
 
 ### Cell Selection
+
 **How will selection work?**
-- TODO: Single click behavior?
-- TODO: Visual feedback (border, background, both)?
-- TODO: How will you show the active cell?
+
+- Single click behavior?
+- Single click selects a cell.
+- Visual feedback (border, background, both)?
+- Accent outline plus a very light background fill.
+- How will you show the active cell?
+- Thicker selection ring on the active cell edge.
 
 ### Cell Editing
-**Your editing strategy:**
-- TODO: How does editing start? (double-click, F2, direct typing, all?)
-- TODO: What happens when user types directly?
-- TODO: How does editing end? (Enter, Tab, Esc, click away?)
-- TODO: Will you show different states for viewing vs editing?
 
-### Keyboard Navigation  
+**Your editing strategy:**
+
+- How does editing start? (double-click, F2, direct typing, all?)
+- Double-click or pressing Enter when a cell is selected.
+- What happens when user types directly?
+- Enters edit mode and replaces cell content.
+- How does editing end? (Enter, Tab, Esc, click away?)
+- Enter commits and moves down; Tab commits and moves right; blur commits.
+- Will you show different states for viewing vs editing?
+- Editing shows an input overlay and text cursor.
+
+### Keyboard Navigation
+
 **Which keys do what?**
-- TODO: Arrow keys behavior?
-- TODO: Tab/Shift+Tab?
-- TODO: Enter key (commit and move down, or just commit)?
-- TODO: Any shortcuts you're adding or skipping?
+
+- Arrow keys behavior?
+- Move selection when not editing; navigate text when editing.
+- Tab/Shift+Tab?
+- Tab moves right; Shift+Tab moves left.
+- Enter key (commit and move down, or just commit)?
+- Enter commits and moves down.
+- Any shortcuts you're adding or skipping?
+- Skipping multi-select and clipboard shortcuts for MVP.
 
 ### Technical Choices
+
 **How will you implement this?**
-- TODO: State management approach (useState, useReducer, context)?
-- TODO: How will you handle focus management?
-- TODO: Event handler strategy (bubbling vs individual)?
+
+- State management approach (useState, useReducer, context)?
+- Local state with custom hooks for cell data and selection.
+- How will you handle focus management?
+- Controlled inputs and refs; explicit commit sources.
+- Event handler strategy (bubbling vs individual)?
+- Individual handlers for cells; global key listener for navigation.
 
 ## Priority 2: Visual Design Decisions
 
 ### Visual Hierarchy
+
 **How will users understand the interface?**
-- TODO: How do headers differ from data cells?
-- TODO: How does selected cell stand out?
-- TODO: How do formulas vs values look different?
-- TODO: Error state appearance?
+
+- How do headers differ from data cells?
+- Bold font weight and slightly larger size for headers.
+- How does selected cell stand out?
+- Accent border and light background fill.
+- How do formulas vs values look different?
+- Values in grid; raw formula shown in the formula bar.
+- Error state appearance?
+- Text inside cell.
 
 ### Spacing System
+
 **Your grid dimensions:**
-- TODO: Cell width and height?
-- TODO: Padding inside cells?
-- TODO: Grid gaps or borders?
-- TODO: Why these specific measurements?
+
+- Cell width and height?
+- 104px width, 32px height.
+- Padding inside cells?
+- 8px horizontal padding.
+- Grid gaps or borders?
+- Subtle gaps between cells; thin border lines.
+- Why these specific measurements?
+- Balances density with readability.
 
 ### Color Palette
+
 **Your chosen colors:**
+
 ```css
-/* TODO: Fill in your actual color values */
---bg-primary: ???;      /* Cell background */
---bg-secondary: ???;    /* Page background */
---border-default: ???;  /* Grid lines */
---border-selected: ???; /* Selection */
---text-primary: ???;    /* Main text */
---error: ???;          /* Error states */
-/* Add more as needed */
+/* Fill in your actual color values */
+--bg-primary: #ffffff; /* Cell background */
+--bg-secondary: #f1f5f9; /* Page background */
+--border-default: #e2e8f0; /* Grid lines */
+--border-selected: #2563eb; /* Selection */
+--text-primary: #1f2937; /* Main text */
+--error: #dc2626; /* Error states */
+--accent: #2563eb; /* Primary action */
+--accent-hover: #1d4ed8; /* Action hover */
 ```
 
 ### Typography
+
 **Your type choices:**
-- TODO: Font for data cells (monospace or proportional)?
-- TODO: Font for UI elements?
-- TODO: Size scale (how many sizes, what are they)?
-- TODO: Weight variations?
+
+- Font for data cells (monospace or proportional)?
+- Proportional Roboto for compactness and readability.
+- Font for UI elements?
+- Roboto for consistency.
+- Size scale (how many sizes, what are they)?
+- XS–XL token scale with small defaults in grid.
+- Weight variations?
+- Regular for data; Medium for headers; Bold for emphasis.
 
 ### Motion & Transitions
+
 **How will things move?**
-- TODO: Will you use transitions? On what?
-- TODO: Animation duration if any?
-- TODO: Hover states?
+
+- Will you use transitions? On what?
+- Subtle background and outline transitions.
+- Animation duration if any?
+- ~120–150ms ease for interactions.
+- Hover states?
+- Light surface tint on hover for cells and buttons.
 
 ## Priority 3: Formula Engine Decisions
 
 ### Formula Selection
+
 **Which 3-5 formulas did you choose?**
-1. TODO: Formula 1 - Why?
-2. TODO: Formula 2 - Why?
-3. TODO: Formula 3 - Why?
-4. TODO: Formula 4 - Why?
-5. TODO: Formula 5 - Why?
+
+1. Formula 1 - Why?
+
+- SUM — core aggregation for totals.
+
+2. Formula 2 - Why?
+
+- AVG — averages and DIV/0 guard logic.
+
+3. Formula 3 - Why?
+
+- MIN — extremum scanning.
+
+4. Formula 4 - Why?
+
+- MAX — complements MIN for ranges.
+
+5. Formula 5 - Why?
+
+- IF — simple branching for display logic.
 
 ### Why These Formulas?
+
 **Your rationale:**
-- TODO: What do these formulas demonstrate about your engine?
-- TODO: How do they work together?
-- TODO: What edge cases do they expose?
-- TODO: What did you NOT choose and why?
+
+- What do these formulas demonstrate about your engine?
+- Cover arithmetic, aggregation, and conditional logic.
+- How do they work together?
+- Enable basic data analysis and reporting.
+- What edge cases do they expose?
+- Division by zero, empty cells, and nested formulas.
+- What did you NOT choose and why?
+- Skipped complex text functions and date handling for simplicity.
 
 ### Parser Implementation
+
 **Your parsing approach:**
-- TODO: Tokenizer/Lexer approach?
-- TODO: Parser type (recursive descent, Pratt, etc)?
-- TODO: How do you handle precedence?
-- TODO: How do you handle errors?
+
+- Tokenizer/Lexer approach?
+- Hand-written lexer emitting typed tokens.
+- Parser type (recursive descent, Pratt, etc)?
+- Pratt parser with a precedence table.
+- How do you handle precedence?
+- Precedence levels and right-assoc exponent.
+- How do you handle errors?
+- Throw tagged parse errors mapped to `PARSE`.
 
 ### Evaluation Strategy
+
 **How formulas get calculated:**
-- TODO: Dependency tracking method?
-- TODO: Recalculation strategy (everything or just affected)?
-- TODO: Cycle detection approach?
-- TODO: Error propagation?
+
+- Dependency tracking method?
+- Dependency graph built from AST references and ranges.
+- Recalculation strategy (everything or just affected)?
+- Recompute affected cells via topo order; fallback full pass.
+- Cycle detection approach?
+- Visited stack detection returning `CYCLE`.
+- Error propagation?
+- Bubble up error objects; show in cell without crashing.
 
 ## Trade-offs & Reflection
 
 ### What I Prioritized
-1. TODO: Most important aspect?
-2. TODO: Second priority?
-3. TODO: Third priority?
+
+1. Most important aspect?
+
+- Correctness and predictable UX.
+
+2. Second priority?
+
+- Keyboard-first navigation.
+
+3. Third priority?
+
+- Maintainable, modular engine.
 
 ### What I Sacrificed
-1. TODO: What did you skip and why?
-2. TODO: What would you add with more time?
-3. TODO: What was harder than expected?
+
+1. What did you skip and why?
+
+- Multi-cell selection and clipboard support for time.
+
+2. What would you add with more time?
+
+- Lookup functions, formatting, and paste operations.
+
+3. What was harder than expected?
+
+- Formula parsing and dependency tracking complexity.
 
 ### Technical Debt
+
 **Shortcuts taken:**
-- TODO: What's not production-ready?
-- TODO: What would need refactoring?
-- TODO: Performance implications?
+
+- What's not production-ready?
+- Global recompute without fine-grained invalidation.
+- What would need refactoring?
+- More robust error handling and user feedback.
+- Performance implications?
+- Extra recomputation on large sheets.
 
 ### Proud Moments
+
 **What worked well:**
-- TODO: Best implementation detail?
-- TODO: Clever solution?
-- TODO: Clean abstraction?
+
+- Best implementation detail?
+- Function registry replacing switch-based dispatch.
+- Clever solution?
+- Pratt parser for flexible formula syntax.
+- Clean abstraction?
+- Address utilities for parsing/formatting.
 
 ### Learning Experience
+
 **What you learned:**
-- TODO: New technique discovered?
-- TODO: What surprised you?
-- TODO: What would you do differently?
+
+- New technique discovered?
+- Pratt parsing and dependency graph algorithms.
+- What surprised you?
+- The complexity of formula parsing and dependency tracking.
+- What would you do differently?
+- Better initial planning of state management and component structure.
 
 ## Time Breakdown
 
 **How you spent your time:**
+
 - Setup & Planning: ??? minutes
-- Core Functionality: ??? minutes  
+  - Draft: ~20–30 min
+- Core Functionality: ??? minutes
+  - Draft: ~1-1.5 hrs
 - Visual Design: ??? minutes
+  - Draft: ~30-45 min
 - Formula Engine: ??? minutes
+  - Draft: ~2–2.5 hrs
 - Testing & Polish: ??? minutes
+  - Draft: ~30-45 min
 - Documentation: ??? minutes
+  - Draft: ~20–40 min
 
 **If you had 1 more hour:**
-- TODO: What would you add/fix/improve?
+
+- What would you add/fix/improve?
+- Implement multi-cell selection and clipboard operations.
 
 ## Final Notes
 
-TODO: Any additional thoughts, explanations, or context you want to share?
+Any additional thoughts, explanations, or context you want to share?
+
+- Focused on a tight MVP with clean paths for growth.

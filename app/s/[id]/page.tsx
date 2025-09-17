@@ -1,84 +1,91 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useCallback, useMemo } from 'react';
 import { useParams } from 'next/navigation';
-import { Sheet } from '@/types';
+import { Grid } from '@/components/Grid';
+import { FormulaBar } from '@/components/FormulaBar';
+import { SheetSkeleton } from '@/components/Skeleton';
+import { useSheet } from '@/hooks/useSheet';
+import { useGridSelection } from '@/hooks/useGridSelection';
 
 export default function SheetPage() {
   const params = useParams();
   const sheetId = params.id as string;
-  
-  const [sheet, setSheet] = useState<Sheet | null>(null);
-  const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    fetchSheet();
-  }, [sheetId]);
+  const { sheet, evaluated, loading, commitCell } = useSheet(sheetId);
 
-  const fetchSheet = async () => {
-    try {
-      const response = await fetch(`/api/sheets/${sheetId}`);
-      if (response.ok) {
-        const data = await response.json();
-        setSheet(data);
-      }
-    } catch (error) {
-      console.error('Failed to fetch sheet:', error);
-    } finally {
-      setLoading(false);
-    }
-  };
+  const maxCols = useMemo(() => Math.min(sheet?.cols || 0, 26), [sheet]);
+  const maxRows = useMemo(() => Math.min(sheet?.rows || 0, 50), [sheet]);
+  const {
+    selected,
+    editing,
+    setSelected,
+    beginEdit,
+    cancelEdit,
+    moveSelection,
+  } = useGridSelection({
+    maxCols,
+    maxRows,
+    disabled: loading || !sheet,
+  });
 
-  if (loading) return <div>Loading sheet...</div>;
-  if (!sheet) return <div>Sheet not found</div>;
+  const formulaBarCommit = useCallback(
+    (raw: string) => {
+      if (selected) commitCell(selected, raw);
+    },
+    [selected, commitCell]
+  );
 
-  // Simple unstyled display of sheet data
+  if (loading)
+    return (
+      <div className='p-4'>
+        <SheetSkeleton />
+      </div>
+    );
+  if (!sheet)
+    return <div className='p-4 text-sm text-red-600'>Sheet not found</div>;
+
+  const selectedCell = selected ? sheet.cells[selected] : undefined;
+
   return (
-    <div>
-      {/* Toolbar */}
-      <div>
-        <h1>{sheet.name}</h1>
-        <button>Sort</button>
-        <button>Export CSV</button>
-      </div>
-
-      {/* Formula Bar */}
-      <div>
-        <span>A1</span>
-        <input type="text" readOnly value="" />
-      </div>
-
-      {/* Grid - just display cells in a table */}
-      <table>
-        <thead>
-          <tr>
-            <th></th>
-            {Array.from({ length: Math.min(sheet.cols, 10) }, (_, i) => (
-              <th key={i}>{String.fromCharCode(65 + i)}</th>
-            ))}
-          </tr>
-        </thead>
-        <tbody>
-          {Array.from({ length: Math.min(sheet.rows, 20) }, (_, row) => (
-            <tr key={row}>
-              <td>{row + 1}</td>
-              {Array.from({ length: Math.min(sheet.cols, 10) }, (_, col) => {
-                const addr = `${String.fromCharCode(65 + col)}${row + 1}`;
-                const cell = sheet.cells[addr as any];
-                return (
-                  <td key={col}>
-                    {cell ? (
-                      cell.kind === 'literal' ? String(cell.value) :
-                      cell.kind === 'formula' ? cell.src :
-                      cell.kind === 'error' ? `#${cell.code}!` : ''
-                    ) : ''}
-                  </td>
-                );
-              })}
-            </tr>
-          ))}
-        </tbody>
-      </table>
+    <div className='p-4 flex flex-col gap-3 min-w-0'>
+      <header className='sheet-toolbar'>
+        <div className='flex items-center gap-3 min-w-0'>
+          <h1 className='sheet-toolbar-title truncate'>{sheet.name}</h1>
+          <span className='sheet-toolbar-meta hidden md:inline-block'>
+            Sheet
+          </span>
+        </div>
+      </header>
+      <FormulaBar
+        selected={selected}
+        cell={selectedCell}
+        editing={!!editing && editing === selected}
+        onBeginEdit={() => selected && beginEdit(selected)}
+        onCommit={formulaBarCommit}
+        onCancel={cancelEdit}
+      />
+      <div className='before-grid-space' />
+      <Grid
+        sheet={sheet}
+        evaluated={evaluated}
+        selected={selected}
+        editing={editing}
+        onSelect={(addr) => {
+          setSelected(addr);
+          cancelEdit();
+        }}
+        onBeginEdit={beginEdit}
+        onCommit={async (addr, raw, source) => {
+          await commitCell(addr, raw);
+          if (source === 'enter') {
+            moveSelection(0, 1);
+          } else if (source === 'tab') {
+            moveSelection(1, 0);
+          }
+        }}
+        onCancelEdit={cancelEdit}
+      />
     </div>
   );
 }

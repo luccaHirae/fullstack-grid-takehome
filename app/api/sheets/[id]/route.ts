@@ -11,13 +11,11 @@ export async function GET(
   { params }: { params: { id: string } }
 ) {
   try {
-    const sheet = sheetStore.get(params.id);
-    
+    const { id } = await params;
+    const sheet = sheetStore.get(id);
+
     if (!sheet) {
-      return NextResponse.json(
-        { error: 'Sheet not found' },
-        { status: 404 }
-      );
+      return NextResponse.json({ error: 'Sheet not found' }, { status: 404 });
     }
 
     // TODO: Evaluate all formulas and include computed values
@@ -37,37 +35,32 @@ export async function PATCH(
   { params }: { params: { id: string } }
 ) {
   try {
-    const sheet = sheetStore.get(params.id);
-    
+    const { id } = await params;
+    const sheet = sheetStore.get(id);
+
     if (!sheet) {
-      return NextResponse.json(
-        { error: 'Sheet not found' },
-        { status: 404 }
-      );
+      return NextResponse.json({ error: 'Sheet not found' }, { status: 404 });
     }
 
     const body = await request.json();
     const validation = validateRequest(SheetPatchSchema, body);
-    
+
     if (!validation.success) {
-      return NextResponse.json(
-        { error: validation.error },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: validation.error }, { status: 400 });
     }
 
     const { edits } = validation.data;
-    
+
     // Apply each edit to the sheet
     for (const edit of edits) {
       const addr = toCellAddress(edit.addr);
-      
+
       if (edit.kind === 'clear') {
         delete sheet.cells[addr];
       } else if (edit.kind === 'literal') {
         sheet.cells[addr] = {
           kind: 'literal',
-          value: edit.value!
+          value: edit.value!,
         };
       } else if (edit.kind === 'formula') {
         // TODO: Parse formula and create AST
@@ -76,24 +69,24 @@ export async function PATCH(
           sheet.cells[addr] = {
             kind: 'formula',
             src: edit.formula!,
-            ast
+            ast,
           };
         } catch (error) {
           // If parsing fails, store as error cell
           sheet.cells[addr] = {
             kind: 'error',
             code: 'PARSE',
-            message: `Invalid formula: ${edit.formula}`
+            message: `Invalid formula: ${edit.formula}`,
           };
         }
       }
     }
 
     sheet.updatedAt = new Date();
-    sheetStore.update(params.id, sheet);
+    sheetStore.update(id, sheet);
 
     // TODO: Recalculate affected cells
-    
+
     return NextResponse.json(sheet);
   } catch (error) {
     return NextResponse.json(

@@ -1,18 +1,18 @@
-import { test, expect, describe, beforeEach } from "bun:test";
+import { test, expect, describe, beforeEach } from 'bun:test';
 import { FormulaEngine, DependencyGraph } from '@/lib/engine';
 import { parseFormula } from '@/lib/parser';
 import { Sheet, toCellAddress } from '@/types';
 import { createSeedSheet } from '@/lib/seed';
 
 describe('Formula Parser', () => {
-  test.skip('parses basic arithmetic', () => {
+  test('parses basic arithmetic', () => {
     // This will fail until parser is implemented
     const ast = parseFormula('1+2*3');
     expect(ast).toBeDefined();
     expect(ast.type).toBe('binary');
   });
-  
-  test.skip('handles operator precedence correctly', () => {
+
+  test('handles operator precedence correctly', () => {
     // This will fail until parser is implemented
     // Should parse as 1+(2*3) not (1+2)*3
     const ast = parseFormula('1+2*3');
@@ -22,15 +22,15 @@ describe('Formula Parser', () => {
     expect(ast.right.type).toBe('binary');
     expect(ast.right.op).toBe('*');
   });
-  
-  test.skip('parses cell references', () => {
+
+  test('parses cell references', () => {
     // This will fail until parser is implemented
     const ast = parseFormula('A1');
     expect(ast.type).toBe('ref');
     expect(ast.address).toBe(toCellAddress('A1'));
   });
-  
-  test.skip('parses function calls', () => {
+
+  test('parses function calls', () => {
     // This will fail until parser is implemented
     const ast = parseFormula('SUM(A1,B2,C3)');
     expect(ast.type).toBe('function');
@@ -40,57 +40,59 @@ describe('Formula Parser', () => {
 });
 
 describe('Dependency Graph', () => {
-  test.skip('detects direct cycles', () => {
+  test('detects direct cycles', () => {
     // This will fail until implemented
     const graph = new DependencyGraph();
     graph.addDependency(toCellAddress('A1'), toCellAddress('B1'));
     graph.addDependency(toCellAddress('B1'), toCellAddress('C1'));
-    
+
     // Adding C1 -> A1 would create a cycle
     expect(graph.hasCycle(toCellAddress('C1'), toCellAddress('A1'))).toBe(true);
   });
 
-  test.skip('detects self-reference cycles', () => {
+  test('detects self-reference cycles', () => {
     // This will fail until implemented
     const graph = new DependencyGraph();
     expect(graph.hasCycle(toCellAddress('A1'), toCellAddress('A1'))).toBe(true);
   });
-  
-  test.skip('correctly identifies no cycle', () => {
+
+  test('correctly identifies no cycle', () => {
     // This will fail until implemented
     const graph = new DependencyGraph();
     graph.addDependency(toCellAddress('A1'), toCellAddress('B1'));
     graph.addDependency(toCellAddress('A1'), toCellAddress('C1'));
-    
+
     // A1 depends on B1 and C1, no cycle
-    expect(graph.hasCycle(toCellAddress('D1'), toCellAddress('A1'))).toBe(false);
+    expect(graph.hasCycle(toCellAddress('D1'), toCellAddress('A1'))).toBe(
+      false
+    );
   });
 });
 
 describe('Formula Evaluation', () => {
   let engine: FormulaEngine;
   let sheet: Sheet;
-  
+
   beforeEach(() => {
     engine = new FormulaEngine();
     sheet = createSeedSheet();
   });
-  
-  test.skip('evaluates literal cells', () => {
+
+  test('evaluates literal cells', () => {
     // This will fail until implemented
     const result = engine.evaluateCell(sheet, toCellAddress('A3'));
     expect(result.value).toBe(1000);
     expect(result.error).toBeUndefined();
   });
-  
-  test.skip('evaluates simple arithmetic formula', () => {
+
+  test('evaluates simple arithmetic formula', () => {
     // This will fail until implemented
     // C3 contains "=A3-B3" where A3=1000, B3=300
     const result = engine.evaluateCell(sheet, toCellAddress('C3'));
     expect(result.value).toBe(700);
   });
-  
-  test.skip('detects circular references in seed data', () => {
+
+  test('detects circular references in seed data', () => {
     // This will fail until implemented
     // C6 and C7 have a circular reference
     const result = engine.evaluateCell(sheet, toCellAddress('C6'));
@@ -100,7 +102,7 @@ describe('Formula Evaluation', () => {
 });
 
 describe('Built-in Functions', () => {
-  test.skip('SUM adds numbers correctly', () => {
+  test('SUM adds numbers correctly', () => {
     // This will fail until implemented
     const sheet: Sheet = {
       id: 'test',
@@ -111,21 +113,21 @@ describe('Built-in Functions', () => {
         [toCellAddress('A1')]: { kind: 'literal', value: 10 },
         [toCellAddress('A2')]: { kind: 'literal', value: 20 },
         [toCellAddress('A3')]: { kind: 'literal', value: 30 },
-        [toCellAddress('B1')]: { 
-          kind: 'formula', 
+        [toCellAddress('B1')]: {
+          kind: 'formula',
           src: '=SUM(A1:A3)',
-          ast: parseFormula('SUM(A1:A3)')
-        }
+          ast: parseFormula('SUM(A1:A3)'),
+        },
       },
-      updatedAt: new Date()
+      updatedAt: new Date(),
     };
-    
+
     const engine = new FormulaEngine();
     const result = engine.evaluateCell(sheet, toCellAddress('B1'));
     expect(result.value).toBe(60);
   });
 
-  test.skip('IF evaluates conditions', () => {
+  test('IF evaluates conditions', () => {
     // This will fail until implemented
     const sheet: Sheet = {
       id: 'test',
@@ -134,15 +136,15 @@ describe('Built-in Functions', () => {
       cols: 10,
       cells: {
         [toCellAddress('A1')]: { kind: 'literal', value: 10 },
-        [toCellAddress('B1')]: { 
-          kind: 'formula', 
+        [toCellAddress('B1')]: {
+          kind: 'formula',
           src: '=IF(A1>5,"big","small")',
-          ast: parseFormula('IF(A1>5,"big","small")')
-        }
+          ast: parseFormula('IF(A1>5,"big","small")'),
+        },
       },
-      updatedAt: new Date()
+      updatedAt: new Date(),
     };
-    
+
     const engine = new FormulaEngine();
     const result = engine.evaluateCell(sheet, toCellAddress('B1'));
     expect(result.value).toBe('big');
