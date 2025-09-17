@@ -1,57 +1,21 @@
-import { CellAddress, toCellAddress } from '@/types';
+import {
+  colToLetter,
+  letterToCol,
+  parseAddress,
+  formatAddress,
+  parseRange,
+  getCellsInRange,
+} from '@/lib/address';
+import type { CellAddress } from '@/types';
 
-// Convert column index to letter(s) (0 -> A, 25 -> Z, 26 -> AA)
-export function colToLetter(col: number): string {
-  // TODO: Implement column index to letter conversion
-  // 0 -> A, 1 -> B, ..., 25 -> Z, 26 -> AA, 27 -> AB, etc.
-  throw new Error('Not implemented');
-}
-
-// Convert letter(s) to column index (A -> 0, Z -> 25, AA -> 26)
-export function letterToCol(letters: string): number {
-  // TODO: Implement letter to column index conversion
-  throw new Error('Not implemented');
-}
-
-// Parse a cell address with absolute/relative refs ($A$1, A$1, $A1, A1)
-export function parseAddress(addr: string): {
-  col: number;
-  row: number;
-  absoluteCol: boolean;
-  absoluteRow: boolean;
-} {
-  // TODO: Parse addresses like A1, $A$1, A$1, $A1
-  throw new Error('Not implemented');
-}
-
-// Format a cell address with absolute/relative refs
-export function formatAddress(
-  col: number,
-  row: number,
-  absoluteCol: boolean = false,
-  absoluteRow: boolean = false
-): CellAddress {
-  // TODO: Format address with $ for absolute refs
-  throw new Error('Not implemented');
-}
-
-// Parse a range (A1:B3)
-export function parseRange(range: string): {
-  start: CellAddress;
-  end: CellAddress;
-} {
-  // TODO: Parse range string into start and end addresses
-  throw new Error('Not implemented');
-}
-
-// Get all cells in a range
-export function getCellsInRange(
-  startAddr: CellAddress,
-  endAddr: CellAddress
-): CellAddress[] {
-  // TODO: Return all cell addresses in the rectangular range
-  throw new Error('Not implemented');
-}
+export {
+  colToLetter,
+  letterToCol,
+  parseAddress,
+  formatAddress,
+  parseRange,
+  getCellsInRange,
+};
 
 // Adjust a cell reference when rows/columns are inserted or deleted
 export function adjustReference(
@@ -82,8 +46,12 @@ export function isValidAddress(
   maxRows: number,
   maxCols: number
 ): boolean {
-  // TODO: Validate that address is within sheet bounds
-  throw new Error('Not implemented');
+  try {
+    const { col, row } = parseAddress(addr);
+    return row >= 0 && row < maxRows && col >= 0 && col < maxCols;
+  } catch {
+    return false;
+  }
 }
 
 // Get neighboring cell address (for arrow key navigation)
@@ -93,6 +61,23 @@ export function getNeighbor(
   maxRows: number,
   maxCols: number
 ): CellAddress | null {
-  // TODO: Return neighboring cell or null if at boundary
-  throw new Error('Not implemented');
+  const { col, row } = parseAddress(addr);
+  let nc = col;
+  let nr = row;
+  switch (direction) {
+    case 'up':
+      nr = row - 1;
+      break;
+    case 'down':
+      nr = row + 1;
+      break;
+    case 'left':
+      nc = col - 1;
+      break;
+    case 'right':
+      nc = col + 1;
+      break;
+  }
+  if (nr < 0 || nr >= maxRows || nc < 0 || nc >= maxCols) return null;
+  return formatAddress(nc, nr);
 }
