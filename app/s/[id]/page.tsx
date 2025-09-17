@@ -56,12 +56,6 @@ export default function SheetPage() {
             Sheet
           </span>
         </div>
-        <div className='sheet-toolbar-actions'>
-          <button className='btn-neutral'>Sort</button>
-          <button className='btn-neutral'>Filter</button>
-          <span className='hidden md:inline h-5 w-px bg-[var(--border)]' />
-          <button className='btn-accent'>Export CSV</button>
-        </div>
       </header>
       <FormulaBar
         selected={selected}
